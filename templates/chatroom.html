@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatRoom</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
+
+    <style>
+        body {
+            margin: 0 auto;
+            max-width: 800px;
+            padding: 0 20px;
+            background-color: #075E54;
+            /*color: white;*/
+        }
+
+        .container {
+            border: 2px solid #dedede;
+            background-color: #f1f1f1;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .container2 {
+            border: 2px solid #dedede;
+            background-color: #a1d3b0;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+
+        .container::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .time-right {
+            float: right;
+            /*color: #aaa;*/
+        }
+
+        .time-left {
+            float: left;
+            color: #999;
+        }
+
+        .ex1 {
+            height: 300px;
+            overflow-y: scroll;
+        }
+
+        p {
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Your Chat Room is Ready... </h2>
+    <h3>{{data2.room}}</h3>
+
+    <h1 class="bg-primary" style="text-align:center">LetsChat <svg xmlns="http://www.w3.org/2000/svg" width="1em"
+            height="1em" fill="lightgreen" class="bi bi-whatsapp" viewBox="0 0 16 16">
+            <path
+                d="M13.601 2.326A7.854 7.854 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.933 7.933 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.898 7.898 0 0 0 13.6 2.326zM7.994 14.521a6.573 6.573 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.557 6.557 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592zm3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.729.729 0 0 0-.529.247c-.182.198-.691.677-.691 1.654 0 .977.71 1.916.81 2.049.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232z" />
+        </svg></h1>
+
+    <div class="container">
+        <div class="ex1" id="myrt">
+
+            {% if data2|length ==0 %}
+
+            {% else %}
+            {% for item in data2 %}
+            <div class="container2">
+                <h5>{{item.userName}}</h5>
+                <p>{{item.message}}</p>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+    <form id="message-form">
+        <input type="text" name="message" id="message-input" class="form-control"
+            placeholder="type your message here...">
+        <input type="submit" value="Send" class="form-control w-25 bg-info my-2">
+    </form>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.js"
+        integrity="sha256-JlqSTELeR4TLqP0OG9dxM7yDPqX1ox/HfgiSLBj8+kM=" crossorigin="anonymous"></script>
+    <script type="module">
+        import { io } from "https://cdn.socket.io/4.4.1/socket.io.esm.min.js";
+        console.log('I am created')
+        var userName = prompt("Enter your UserName")
+        console.log(userName)
+        if (userName === null) {
+            window.location.reload();
+            alert('Please refresh this page...')
+        }
+        const socket = io();
+        $(document).ready(function () {
+            alert("hello")
+            document.getElementById('message-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                var messageInput = document.getElementById('message-input');
+                var user = userName
+                var message = messageInput.value;
+                messageInput.value = '';
+                // socket.emit('message', { content: message });
+                socket.emit('message', { username: user, content: message });
+            });
+
+            socket.on('message', function (data) {
+                var messageList = document.getElementById('myrt');
+                var dt = data.username;
+                if (data.username != undefined) {
+                    var getUser = data.username
+                    var myContent = `<div class="container2">
+                    <h5>${getUser}</h5>
+                     <p>${data.content}</p>  
+                     </div>`
+                    $("#myrt").append(myContent);
+                }
+                // messageElement.textContent = data.content;
+                console.log(data.content)
+                console.log(data.username)
+                // messageList.appendChild(messageElement);
+            });
+        });
+
+    </script>
+</body>
+
+</html>
